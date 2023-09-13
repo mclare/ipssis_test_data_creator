@@ -14,13 +14,13 @@
  *****************************************************************/
 // Define the common suffix variable
 $commonSuffix = "_TEST";
-$defaultAction = "UPDATE";
-$version=2.1; //Mainly affects Other and User file, ie. Adds preferred names to Users file.
+$version=2.1; //Value written to manifest.json. Mainly affects Other and User file, ie. Adds preferred names to Users file.
 $zipFileName = 'TEST-IPSIS-Batch-Creator'.$commonSuffix.'-'.date("Y-m-d-His").'.zip'; // Specify the name of the zip file
 
-$scenario = 1; // 0 = Create CSV files with default data, 1 = Create CSV files with Brock-like data
+$scenario = 1.1;
 
-if (version_compare($scenario,2,"<")) {
+if (version_compare($scenario,2,"<")) { //Scenario 1 basic data
+    $defaultAction = "UPDATE";
     $startDate = date('Y-m-d', strtotime('-1 day'));
     $endDate = date('Y-m-d', strtotime('+90 days'));
     $offeringCode = 'TEST-OFFERING';
@@ -65,10 +65,10 @@ foreach ($fileNames as $fileName) {
 
     switch ($fileName) {
         case "0-Other":
-            if ($scenario == 1) $dataForFile = array('faculty',$defaultAction,'TEST-FACULTY','TEST FACULTY');
+            if (version_compare($scenario,2,"<")) $dataForFile = array('faculty',$defaultAction,'TEST-FACULTY','TEST FACULTY');
             break;
         case "1-Departments":
-            if ($scenario == 1) $dataForFile = array('department',$defaultAction,'TEST-DEPARTMENT','TEST DEPARTMENT','','','TRUE','','','','','TEST-FACULTY');
+            if (version_compare($scenario,2,"<")) $dataForFile = array('department',$defaultAction,'TEST-DEPARTMENT','TEST DEPARTMENT','','','TRUE','','','','','TEST-FACULTY');
             break;
         case "2-Semesters":
             //semester,UPDATE,OTHR-HS,NonAcademic,2020-01-01,2999-12-31,,,,,,
@@ -114,6 +114,16 @@ foreach ($fileNames as $fileName) {
                 foreach($userData as $value) {
                     $enrollmentsData[] = array('enrollment',$defaultAction,$value[3],'Student','TEST-COURSE-SECTION-01');
                 }
+            }
+            if (version_compare($scenario,1.1,"==")) {       
+                $dataForFile = array('<!-- Use sectionData! This is just to trigger the fputscsv logic-->');
+                $enrollmentsData = array();
+                for($i=1;$i<=1000;$i++) {
+                     // Determine the action based on even and odd loop iterations
+                    $action = ($i % 2 == 0) ? 'UPDATE' : 'DELETE';
+                    $enrollmentsData[] = array('enrollment',$action,$userData[0][3],'Student','TEST-COURSE-SECTION-01');
+                }
+
             }
             break;
     }

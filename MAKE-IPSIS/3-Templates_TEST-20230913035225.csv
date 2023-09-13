@@ -1,0 +1,2 @@
+type,action,code,name,start_date,end_date,is_active,department_code,template_code,semester_code,offering_code,custom_code
+"course template",UPDATE,TEST-TEMPLATE,"TEST TEMPLATE",,,,TEST-DEPARTMENT,,,,
