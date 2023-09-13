@@ -1,0 +1,2 @@
+type,action,code,name,start_date,end_date,is_active,department_code,template_code,semester_code,offering_code,custom_code
+"course offering",UPDATE,TEST-OFFERING,"TEST OFFERING",2023-08-13,2023-12-13,,TEST-DEPARTMENT,TEST-TEMPLATE,TEST-SEMESTER,,

@@ -1,0 +1,11 @@
+type,action,username,org_defined_id,first_name,last_name,password,is_active,role_name,email,relationships,pref_first_name,pref_last_name,sort_last_name
+user,UPDATE,test_user_001,90568855501,"TEST USER FIRST 001","TEST USER LAST 001",,TRUE,student,test001@localhost.localdomain,,"FIRST 001","LAST 001",
+user,UPDATE,test_user_002,90568855502,"TEST USER FIRST 002","TEST USER LAST 002",,TRUE,student,test002@localhost.localdomain,,"FIRST 002","LAST 002",
+user,UPDATE,test_user_003,90568855503,"TEST USER FIRST 003","TEST USER LAST 003",,TRUE,student,test003@localhost.localdomain,,"FIRST 003","LAST 003",
+user,UPDATE,test_user_004,90568855504,"TEST USER FIRST 004","TEST USER LAST 004",,TRUE,student,test004@localhost.localdomain,,"FIRST 004","LAST 004",
+user,UPDATE,test_user_005,90568855505,"TEST USER FIRST 005","TEST USER LAST 005",,TRUE,student,test005@localhost.localdomain,,"FIRST 005","LAST 005",
+user,UPDATE,test_user_006,90568855506,"TEST USER FIRST 006","TEST USER LAST 006",,TRUE,student,test006@localhost.localdomain,,"FIRST 006","LAST 006",
+user,UPDATE,test_user_007,90568855507,"TEST USER FIRST 007","TEST USER LAST 007",,TRUE,student,test007@localhost.localdomain,,"FIRST 007","LAST 007",
+user,UPDATE,test_user_008,90568855508,"TEST USER FIRST 008","TEST USER LAST 008",,TRUE,student,test008@localhost.localdomain,,"FIRST 008","LAST 008",
+user,UPDATE,test_user_009,90568855509,"TEST USER FIRST 009","TEST USER LAST 009",,TRUE,student,test009@localhost.localdomain,,"FIRST 009","LAST 009",
+user,UPDATE,test_user_010,90568855510,"TEST USER FIRST 010","TEST USER LAST 010",,TRUE,student,test010@localhost.localdomain,,"FIRST 010","LAST 010",
