@@ -116,7 +116,6 @@ foreach ($fileNames as $fileName) {
                 }
             }
             break;
-        break;
     }
 
     // Write the data to the CSV file, but only if we have data to write
