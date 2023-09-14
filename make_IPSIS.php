@@ -10,7 +10,7 @@
  * Additional scenarios can be added by defining new properties to within the switch statements. The version_compare allows for a scenario 1.1 to rely on the same code as 1.0.
  * 
  * Created by: Matt Clare
- * Date: Tuesday September 12, 2023
+ * Date: Thursday September 14, 2023
  *****************************************************************/
 // Define the common suffix variable
 $commonSuffix = "_TEST";
@@ -19,13 +19,24 @@ $zipFileName = 'TEST-IPSIS-Batch-Creator'.$commonSuffix.'-'.date("Y-m-d-His").'.
 
 $scenario = 1.1;
 
+/*
+Scenario 1.0: Create a basic Org Structure from Faculty (Other, between Root/Org and Department) to Course Section (Child, between Offering and User)
+Section 1.1-1.5: Enroll users in different sections, different amounts of times first section
+Scenario 1.4 should be that test_user_10 is enrolled in TEST-COURSE-SECTION-07 in batch 1.41, then added to TEST-COURSE-SECTION-05 in batch 1.42, then removed from TEST-COURSE-SECTION-07 in batch 1.42
+
+*/
 if (version_compare($scenario,2,"<")) { //Scenario 1 basic data
     $defaultAction = "UPDATE";
     $startDate = date('Y-m-d', strtotime('-1 day'));
     $endDate = date('Y-m-d', strtotime('+90 days'));
     $offeringCode = 'TEST-OFFERING';
     $semesterCode = 'TEST-SEMESTER';
+    $org_defined_id = 90568855500; //Starting point for org_defined_ids, also Brock University's phone number
+    $totalUsers = 10;
+    $sectionsPerOffering = 10;
 }
+if (version_compare($scenario,1.1,"==")) $totalEnrollmentActions = 1000;
+
 // Create an array to store the paths of the created CSV files
 $csvFilePaths = array();
 
@@ -65,77 +76,94 @@ foreach ($fileNames as $fileName) {
 
     switch ($fileName) {
         case "0-Other":
-            if (version_compare($scenario,2,"<")) $dataForFile = array('faculty',$defaultAction,'TEST-FACULTY','TEST FACULTY');
+            if (version_compare($scenario,3,"<")) $dataForFile[] = array('faculty',$defaultAction,'TEST-FACULTY','TEST FACULTY');
             break;
         case "1-Departments":
-            if (version_compare($scenario,2,"<")) $dataForFile = array('department',$defaultAction,'TEST-DEPARTMENT','TEST DEPARTMENT','','','TRUE','','','','','TEST-FACULTY');
+            if (version_compare($scenario,2,"<")) $dataForFile[] = array('department',$defaultAction,'TEST-DEPARTMENT','TEST DEPARTMENT','','','TRUE','','','','','TEST-FACULTY');
             break;
         case "2-Semesters":
-            //semester,UPDATE,OTHR-HS,NonAcademic,2020-01-01,2999-12-31,,,,,,
-
             if (version_compare($scenario,2,"<")) {
                 $startDate = date('Y-m-d', strtotime('-1 months'));
                 $endDate = date('Y-m-d', strtotime('+3 months'));
-                $dataForFile = array('semester',$defaultAction,$semesterCode,'TEST',$startDate,$endDate);
+                $dataForFile[] = array('semester',$defaultAction,$semesterCode,'TEST',$startDate,$endDate);
             }
             break;
         case "3-Templates":
-            if (version_compare($scenario,2,"<")) $dataForFile = array('course template',$defaultAction,'TEST-TEMPLATE','TEST TEMPLATE','','','','TEST-DEPARTMENT');
+            if (version_compare($scenario,2,"<")) $dataForFile[] = array('course template',$defaultAction,'TEST-TEMPLATE','TEST TEMPLATE','','','','TEST-DEPARTMENT');
             break;
         case "4-Offerings":
             if (version_compare($scenario,2,"<")) {
-                $dataForFile = array('course offering',$defaultAction,$offeringCode,'TEST OFFERING',$startDate,$endDate,'','TEST-DEPARTMENT','TEST-TEMPLATE',$semesterCode);
+                $dataForFile[] = array('course offering',$defaultAction,$offeringCode,'TEST OFFERING',$startDate,$endDate,'','TEST-DEPARTMENT','TEST-TEMPLATE',$semesterCode);
             }
             break;
         case "5-Sections":
             if (version_compare($scenario,2,"<")) {
-                $dataForFile = array('<!-- Use sectionData! This is just to trigger the fputscsv logic-->');
-                $sectionData = array();
-                for($i=1;$i<=10;$i++) {
-                    $sectionData[] = array('course section',$defaultAction,sprintf('TEST-COURSE-SECTION-%\'.02d',$i),sprintf('TEST COURSE SECTION %\'.02d',$i),'','','','','','',$offeringCode,"");
+                for($i=1;$i<=$sectionsPerOffering;$i++) {
+                    $dataForFile[] = array('course section',$defaultAction,sprintf('TEST-COURSE-SECTION-%\'.02d',$i),sprintf('TEST COURSE SECTION %\'.02d',$i),'','','','','','',$offeringCode,"");
                 }
             }
             break;
-        case "6-Users":
-            if (version_compare($scenario,2,"<")) {       
-                $dataForFile = array('<!-- Use sectionData! This is just to trigger the fputscsv logic-->');
-                $org_defined_id = 90568855500; //Starting point for org_defined_ids, also Brock University's phone number
-                $userData = array();
-                for($i=1;$i<=10;$i++) {
+        case "6-Users": //Only case that needs an additional array, $userData, to store data for use in enrollments
+            if (version_compare($scenario,2,"<")) {
+                if(!isset($userData)) $userData = array(); //If we haven't created the array yet, create it
+                for($i=1;$i<=$totalUsers;$i++) {
                     $org_defined_id++;
-                    $userData[] = array('user',$defaultAction,sprintf('test_user_%\'.03d',$i),$org_defined_id,sprintf('TEST USER FIRST %\'.03d',$i),sprintf('TEST USER LAST %\'.03d',$i),'','TRUE','student',sprintf('test%\'.03d@localhost.localdomain',$i),'',sprintf('FIRST %\'.03d',$i),sprintf('LAST %\'.03d',$i),"");
+                    $userToInsert = array('user',$defaultAction,sprintf('test_user_%\'.03d',$i),$org_defined_id,sprintf('TEST USER FIRST %\'.03d',$i),sprintf('TEST USER LAST %\'.03d',$i),'','TRUE','student',sprintf('test%\'.03d@localhost.localdomain',$i),'',sprintf('FIRST %\'.03d',$i),sprintf('LAST %\'.03d',$i),"");
+                    $dataForFile[] = $userToInsert;
+                    $userData[] = $userToInsert; //Adding to this array for use in enrollments
                 }
             }
             break;
         case "7-Enrollments":
-            if (version_compare($scenario,1,"==")) {       
-                $dataForFile = array('<!-- Use sectionData! This is just to trigger the fputscsv logic-->');
-                $enrollmentsData = array();
+            if (version_compare($scenario,1,"==")) {  //Enrolls all users in the first section
                 foreach($userData as $value) {
-                    $enrollmentsData[] = array('enrollment',$defaultAction,$value[3],'Student','TEST-COURSE-SECTION-01');
+                    $dataForFile[] = array('enrollment',$defaultAction,$value[3],'Student','TEST-COURSE-SECTION-01');
                 }
             }
-            if (version_compare($scenario,1.1,"==")) {       
-                $dataForFile = array('<!-- Use sectionData! This is just to trigger the fputscsv logic-->');
-                $enrollmentsData = array();
-                for($i=1;$i<=1000;$i++) {
+            if (version_compare($scenario,1.1,"<=") && version_compare($scenario,2,"<")) { //Enrolls first user in the first section, then unrolls them x $totalEnrollmentActions
+                for($i=1;$i<=$totalEnrollmentActions;$i++) {
                      // Determine the action based on even and odd loop iterations
                     $action = ($i % 2 == 0) ? 'UPDATE' : 'DELETE';
-                    $enrollmentsData[] = array('enrollment',$action,$userData[0][3],'Student','TEST-COURSE-SECTION-01');
+                    $dataForFile[] = array('enrollment',$action,$userData[0][3],'Student','TEST-COURSE-SECTION-01');
                 }
+            }
+            if (version_compare($scenario,1.2,"==")) {  //Enrolls second user in the second section, then unrolls them x 1000 but the last action is an update (enroll)
+                for($i=1;$i<=10;$i++) {
+                    $dataForFile[] = array('enrollment','UPDATE',$userData[1][3],'Student','TEST-COURSE-SECTION-02');
+                    $dataForFile[] = array('enrollment','DELETE',$userData[1][3],'Student','TEST-COURSE-SECTION-02');
+                    $dataForFile[] = array('enrollment','UPDATE',$userData[1][3],'Student','TEST-COURSE-SECTION-03');
+                    $dataForFile[] = array('enrollment','DELETE',$userData[1][3],'Student','TEST-COURSE-SECTION-03');
+                }
+                $enrollmentsData[] = array('enrollment','UPDATE',$userData[1][3],'Student','TEST-COURSE-SECTION-04');
+            }
+            if (version_compare($scenario,1.3,"==")) {  //Enrolls second user in the second section, then unrolls them x 1000 but the last action is an update (enroll) +
+                for($i=1;$i<=10;$i++) {
+                    $dataForFile[] = array('enrollment','UPDATE',$userData[1][3],'Student','TEST-COURSE-SECTION-02');
+                    $dataForFile[] = array('enrollment','DELETE',$userData[1][3],'Student','TEST-COURSE-SECTION-02');
+                    $dataForFile[] = array('enrollment','UPDATE',$userData[1][3],'Student','TEST-COURSE-SECTION-03');
+                    $dataForFile[] = array('enrollment','DELETE',$userData[1][3],'Student','TEST-COURSE-SECTION-03');
+                }
+                $dataForFile[] = array('enrollment','UPDATE',$userData[1][3],'Student','TEST-COURSE-SECTION-04');
+                //Giving it more to do
+                $dataForFile[] = array('enrollment','UPDATE',$userData[2][3],'Student','TEST-COURSE-SECTION-05');
+                $dataForFile[] = array('enrollment','UPDATE',$userData[3][3],'Student','TEST-COURSE-SECTION-06');
+                $dataForFile[] = array('enrollment','UPDATE',$userData[4][3],'Student','TEST-COURSE-SECTION-07');
+                $dataForFile[] = array('enrollment','DELETE',$userData[4][3],'Student','TEST-COURSE-SECTION-07');
+            }
 
+            if (version_compare($scenario,1.41,"==")) {  
+                $dataForFile[] = array('enrollment','UPDATE',$userData[9][3],'Student','TEST-COURSE-SECTION-07');
+            }
+            if (version_compare($scenario,1.42,"==")) { 
+
+                $dataForFile[] = array('enrollment','UPDATE',$userData[9][3],'Student','TEST-COURSE-SECTION-05');
+                $dataForFile[] = array('enrollment','DELETE',$userData[9][3],'Student','TEST-COURSE-SECTION-07');
             }
             break;
     }
 
     // Write the data to the CSV file, but only if we have data to write
-    if (count($dataForFile) > 0) {
-
-        // Pad the data array if its length is less than the header's length
-        if (count($dataForFile) > count($header)) die("The data array is longer than the header array.");
-        else if (count($dataForFile) < count($header)) {
-            $dataForFile = array_pad($dataForFile, count($header), '');
-        }
+    if (is_array($dataForFile[0]) && count($dataForFile[0]) > 0) {
 
         // Generate the file name with the common suffix
         $csvFileName = $fileName . $commonSuffix .'-' .date('YmdHis').".csv";
@@ -147,30 +175,20 @@ foreach ($fileNames as $fileName) {
         // Write the header to the CSV file
         fputcsv($file, $header);
 
-        switch ($fileName) {
-            case "5-Sections":
-                foreach ($sectionData as $value) {
-                    fputcsv($file, $value);
-                }
-            break;
-            case "6-Users":
-                foreach ($userData as $value) {
-                    fputcsv($file, $value);
-                }
-            break;
-            case "7-Enrollments":
-                foreach ($enrollmentsData as $value) {
-                    fputcsv($file, $value);
-                }
-            break;
-            default:
-                fputcsv($file, $dataForFile);
-            break;
-         }
-       
+        foreach ($dataForFile as $value) {
+            
+            // Pad the data array if its length is less than the header's length
+            if (count($value) > count($header)) die("The data array is longer than the header array.");
+            else if (count($value) < count($header)) {
+                $value = array_pad($value, count($header), '');
+            }
+
+            fputcsv($file, $value);
+        }
 
         // Close the CSV file
         fclose($file);
+        unset($dataForFile);
     }
 }
 //Create manifest.json file
