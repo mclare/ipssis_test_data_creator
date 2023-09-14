@@ -79,32 +79,32 @@ foreach ($fileNames as $fileName) {
             if (version_compare($scenario,3,"<")) $dataForFile[] = array('faculty',$defaultAction,'TEST-FACULTY','TEST FACULTY');
             break;
         case "1-Departments":
-            if (version_compare($scenario,2,"<")) $dataForFile[] = array('department',$defaultAction,'TEST-DEPARTMENT','TEST DEPARTMENT','','','TRUE','','','','','TEST-FACULTY');
+            if (version_compare($scenario,3,"<")) $dataForFile[] = array('department',$defaultAction,'TEST-DEPARTMENT','TEST DEPARTMENT','','','TRUE','','','','','TEST-FACULTY');
             break;
         case "2-Semesters":
-            if (version_compare($scenario,2,"<")) {
+            if (version_compare($scenario,3,"<")) {
                 $startDate = date('Y-m-d', strtotime('-1 months'));
                 $endDate = date('Y-m-d', strtotime('+3 months'));
                 $dataForFile[] = array('semester',$defaultAction,$semesterCode,'TEST',$startDate,$endDate);
             }
             break;
         case "3-Templates":
-            if (version_compare($scenario,2,"<")) $dataForFile[] = array('course template',$defaultAction,'TEST-TEMPLATE','TEST TEMPLATE','','','','TEST-DEPARTMENT');
+            if (version_compare($scenario,3,"<")) $dataForFile[] = array('course template',$defaultAction,'TEST-TEMPLATE','TEST TEMPLATE','','','','TEST-DEPARTMENT');
             break;
         case "4-Offerings":
-            if (version_compare($scenario,2,"<")) {
+            if (version_compare($scenario,3,"<")) {
                 $dataForFile[] = array('course offering',$defaultAction,$offeringCode,'TEST OFFERING',$startDate,$endDate,'','TEST-DEPARTMENT','TEST-TEMPLATE',$semesterCode);
             }
             break;
         case "5-Sections":
-            if (version_compare($scenario,2,"<")) {
+            if (version_compare($scenario,3,"<")) {
                 for($i=1;$i<=$sectionsPerOffering;$i++) {
-                    $dataForFile[] = array('course section',$defaultAction,sprintf('TEST-COURSE-SECTION-%\'.02d',$i),sprintf('TEST COURSE SECTION %\'.02d',$i),'','','','','','',$offeringCode,"");
+                    $dataForFile[] = array('course section',$defaultAction,sprintf('TEST-COURSE-SECTION-%\'.02d',$i),sprintf('TEST COURSE SECTION %\'.02d',$i),'','','','','','',$offeringCode);
                 }
             }
             break;
         case "6-Users": //Only case that needs an additional array, $userData, to store data for use in enrollments
-            if (version_compare($scenario,2,"<")) {
+            if (version_compare($scenario,3,"<")) {
                 if(!isset($userData)) $userData = array(); //If we haven't created the array yet, create it
                 for($i=1;$i<=$totalUsers;$i++) {
                     $org_defined_id++;
